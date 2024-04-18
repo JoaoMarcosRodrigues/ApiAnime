@@ -108,5 +108,49 @@ namespace ApiAnime.Controllers
 
             return CreatedAtAction(nameof(Anime), new {ID = anime.ID}, anime);
         }
+
+        [HttpPut]
+        public async Task<IActionResult> EditarAnime(int id, Anime anime)
+        {
+            if(id != anime.ID)
+            {
+                return BadRequest();
+            }
+
+            _animeContext.Entry(anime).State = EntityState.Modified;
+
+            try
+            {
+                await _animeContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletarAnime(int id)
+        {
+            if(_animeContext == null)
+            {
+                return NotFound();
+            }
+
+            var anime = await _animeContext.Animes.FindAsync(id);
+
+            if(anime == null)
+            {
+                return NotFound();
+            }
+
+            _animeContext.Animes.Remove(anime);
+
+            await _animeContext.SaveChangesAsync();
+
+            return Ok();
+        }
     }
 }
