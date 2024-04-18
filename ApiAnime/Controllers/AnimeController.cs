@@ -27,7 +27,7 @@ namespace ApiAnime.Controllers
             return await _animeContext.Animes.ToListAsync();
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("porId/{id}")]
         public async Task<ActionResult<Anime>> GetAnimeById(int id)
         {
             if(_animeContext.Animes == null)
@@ -45,7 +45,7 @@ namespace ApiAnime.Controllers
             return anime;
         }
 
-        [HttpGet("{nome}")]
+        [HttpGet("porNome/{nome}")]
         public async Task<ActionResult<Anime>> GetAnimeByNome(string nome)
         {
             if (_animeContext.Animes == null)
@@ -63,7 +63,7 @@ namespace ApiAnime.Controllers
             return anime;
         }
 
-        [HttpGet("{diretor}")]
+        [HttpGet("porDiretor/{diretor}")]
         public async Task<ActionResult<Anime>> GetAnimeByDiretor(string diretor)
         {
             if (_animeContext.Animes == null)
@@ -81,7 +81,7 @@ namespace ApiAnime.Controllers
             return anime;
         }
 
-        [HttpGet("{palavra_chave}")]
+        [HttpGet("porPalavraChave/{palavra_chave}")]
         public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByPalavraChaveResumo(string palavra_chave)
         {
             if (_animeContext.Animes == null)
@@ -106,7 +106,7 @@ namespace ApiAnime.Controllers
 
             await _animeContext.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(Anime), new {ID = anime.ID}, anime);
+            return CreatedAtAction(nameof(GetAnimeById), new {id = anime.ID}, anime);
         }
 
         [HttpPut]
