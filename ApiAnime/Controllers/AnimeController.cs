@@ -4,7 +4,7 @@ using ApiAnime.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace ApiAnime.Controllers
 {
@@ -22,7 +22,7 @@ namespace ApiAnime.Controllers
         }
 
         [Authorize]
-        [HttpGet("{page}")]
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes(int page, int pageSize)
         {
             if(_animeContext.Animes == null)
@@ -40,14 +40,14 @@ namespace ApiAnime.Controllers
                 .Take(pageSize)
                 .ToList();
 
-            _logger.LogInformation("Listagem de todos os animes: \n"+ animes);
-            _logger.LogInformation("Listagem de todos os animes da página "+page+ "\n" + animesPerPage);
+            _logger.LogInformation("Listagem de todos os animes: \n"+ JsonConvert.SerializeObject(animes));
+            _logger.LogInformation("Listagem de todos os animes da página "+page+ "\n" + JsonConvert.SerializeObject(animesPerPage));
 
             var response = new AnimeResponse
             {
                 Animes = animesPerPage,
-                Pages = page,
-                CurrentPage = pageCount
+                Pages = pageCount,
+                CurrentPage = page
             };
 
             return Ok(response);
@@ -69,72 +69,120 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
-            _logger.LogInformation("Listagem de animes por Id: \n" + anime);
+            _logger.LogInformation("Listagem de animes por Id: \n" + JsonConvert.SerializeObject(anime));
 
             return anime;
         }
 
         [Authorize]
         [HttpGet("porNome/{nome}")]
-        public async Task<ActionResult<Anime>> GetAnimeByNome(string nome)
+        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByNome(string nome, int page, int pageSize)
         {
             if (_animeContext.Animes == null)
             {
                 return NotFound();
             }
 
-            var animes = await _animeContext.Animes.FindAsync(nome);
+            var animes = await _animeContext.Animes.Where(x => x.NOME != null && x.NOME.ToLower() == nome.ToLower()).ToListAsync();
 
-            if(animes == null)
+            var totalCount = animes.Count;
+            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+
+            var animesPerPage = animes
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            if (animes == null)
             {
                 return NotFound();
             }
 
-            _logger.LogInformation("Listagem de animes por Nome: \n" + animes);
+            _logger.LogInformation("Listagem de animes por Nome: \n" + JsonConvert.SerializeObject(animes));
+            _logger.LogInformation("Listagem de animes por Nome da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
 
-            return animes;
+            var response = new AnimeResponse
+            {
+                Animes = animesPerPage,
+                Pages = pageCount,
+                CurrentPage = page
+            };
+
+            return Ok(response);
         }
 
         [Authorize]
         [HttpGet("porDiretor/{diretor}")]
-        public async Task<ActionResult<Anime>> GetAnimeByDiretor(string diretor)
+        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByDiretor(string diretor, int page, int pageSize)
         {
             if (_animeContext.Animes == null)
             {
                 return NotFound();
             }
 
-            var animes = await _animeContext.Animes.FindAsync(diretor);
+            var animes = await _animeContext.Animes.Where(x => x.DIRETOR != null && x.DIRETOR.ToLower() == diretor.ToLower()).ToListAsync();
+
+            var totalCount = animes.Count;
+            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+
+            var animesPerPage = animes
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             if (animes == null)
             {
                 return NotFound();
             }
 
-            _logger.LogInformation("Listagem de animes por Diretor: \n" + animes);
+            _logger.LogInformation("Listagem de animes por Diretor: \n" + JsonConvert.SerializeObject(animes));
+            _logger.LogInformation("Listagem de animes por Diretor da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
 
-            return animes;
+            var response = new AnimeResponse
+            {
+                Animes = animesPerPage,
+                Pages = pageCount,
+                CurrentPage = page
+            };
+
+            return Ok(response);
         }
 
         [Authorize]
         [HttpGet("porPalavraChave/{palavra_chave}")]
-        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByPalavraChaveResumo(string palavra_chave)
+        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByPalavraChaveResumo(string palavra_chave, int page, int pageSize)
         {
             if (_animeContext.Animes == null)
             {
                 return NotFound();
             }
 
-            var animes = await _animeContext.Animes.Where(x => x.RESUMO != null && x.RESUMO.Contains(palavra_chave)).ToListAsync();
+            var animes = await _animeContext.Animes.Where(x => x.RESUMO != null && x.RESUMO.ToLower().Contains(palavra_chave.ToLower())).ToListAsync();
+
+            var totalCount = animes.Count;
+            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+
+            var animesPerPage = animes
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             if (animes == null)
             {
                 return NotFound();
             }
 
-            _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo: \n" + animes);
+            _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo: \n" + JsonConvert.SerializeObject(animes));
+            _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
 
-            return animes;
+            var response = new AnimeResponse
+            {
+                Animes = animesPerPage,
+                Pages = pageCount,
+                CurrentPage = page
+            };
+
+            return Ok(response);
         }
 
         [Authorize]
