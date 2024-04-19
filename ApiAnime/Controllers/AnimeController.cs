@@ -1,5 +1,6 @@
 ﻿using ApiAnime.Context;
 using ApiAnime.Models;
+using ApiAnime.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +22,8 @@ namespace ApiAnime.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes(int page = 1, int pageSize = 10)
+        [HttpGet("{page}")]
+        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes(int page, int pageSize)
         {
             if(_animeContext.Animes == null)
             {
@@ -32,7 +33,7 @@ namespace ApiAnime.Controllers
             var animes = await _animeContext.Animes.ToListAsync();
 
             var totalCount = animes.Count;
-            var totalPages = (int)Math.Ceiling((decimal)totalCount / pageSize);
+            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
 
             var animesPerPage = animes
                 .Skip((page - 1) * pageSize)
@@ -42,7 +43,14 @@ namespace ApiAnime.Controllers
             _logger.LogInformation("Listagem de todos os animes: \n"+ animes);
             _logger.LogInformation("Listagem de todos os animes da página "+page+ "\n" + animesPerPage);
 
-            return animesPerPage;
+            var response = new AnimeResponse
+            {
+                Animes = animesPerPage,
+                Pages = page,
+                CurrentPage = pageCount
+            };
+
+            return Ok(response);
         }
 
         [Authorize]
