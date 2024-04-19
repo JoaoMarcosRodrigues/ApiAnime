@@ -22,7 +22,7 @@ namespace ApiAnime.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes()
+        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes(int page = 1, int pageSize = 10)
         {
             if(_animeContext.Animes == null)
             {
@@ -31,9 +31,18 @@ namespace ApiAnime.Controllers
 
             var animes = await _animeContext.Animes.ToListAsync();
 
-            _logger.LogInformation("Listagem de todos os animes: \n"+ animes);
+            var totalCount = animes.Count;
+            var totalPages = (int)Math.Ceiling((decimal)totalCount / pageSize);
 
-            return animes;
+            var animesPerPage = animes
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            _logger.LogInformation("Listagem de todos os animes: \n"+ animes);
+            _logger.LogInformation("Listagem de todos os animes da página "+page+ "\n" + animesPerPage);
+
+            return animesPerPage;
         }
 
         [Authorize]
