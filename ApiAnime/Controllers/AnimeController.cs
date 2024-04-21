@@ -1,6 +1,7 @@
 ﻿using ApiAnime.Context;
 using ApiAnime.Models;
 using ApiAnime.Response;
+using ApiAnime.Util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,24 +26,24 @@ namespace ApiAnime.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes(int page, int pageSize)
         {
-            if(_animeContext.Animes == null)
+            if (_animeContext.Animes == null)
             {
                 return NotFound();
             }
 
+            // Consulta
             var animes = await _animeContext.Animes.ToListAsync();
 
-            var totalCount = animes.Count;
-            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
+            // Paginação
+            int pageCount;
+            List<Anime> animesPerPage;
+            PaginacaoUtil.GetPaginacao(page, pageSize, animes, out pageCount, out animesPerPage);
 
-            var animesPerPage = animes
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            // Logs
+            _logger.LogInformation("Listagem de todos os animes: \n" + JsonConvert.SerializeObject(animes));
+            _logger.LogInformation("Listagem de todos os animes da página " + page + "\n" + JsonConvert.SerializeObject(animesPerPage));
 
-            _logger.LogInformation("Listagem de todos os animes: \n"+ JsonConvert.SerializeObject(animes));
-            _logger.LogInformation("Listagem de todos os animes da página "+page+ "\n" + JsonConvert.SerializeObject(animesPerPage));
-
+            // Montagem resposta
             var response = new AnimeResponse
             {
                 Animes = animesPerPage,
@@ -62,6 +63,7 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
+            // Consulta
             var anime = await _animeContext.Animes.FindAsync(id);
 
             if (anime == null)
@@ -69,6 +71,7 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
+            // Log
             _logger.LogInformation("Listagem de animes por Id: \n" + JsonConvert.SerializeObject(anime));
 
             return anime;
@@ -83,24 +86,24 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
+            // Consulta
             var animes = await _animeContext.Animes.Where(x => x.NOME != null && x.NOME.ToLower() == nome.ToLower()).ToListAsync();
-
-            var totalCount = animes.Count;
-            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
-
-            var animesPerPage = animes
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            
+            // Paginação
+            int pageCount;
+            List<Anime> animesPerPage;
+            PaginacaoUtil.GetPaginacao(page, pageSize, animes, out pageCount, out animesPerPage);
 
             if (animes == null)
             {
                 return NotFound();
             }
 
+            // Logs
             _logger.LogInformation("Listagem de animes por Nome: \n" + JsonConvert.SerializeObject(animes));
             _logger.LogInformation("Listagem de animes por Nome da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
 
+            // Montagem resposta
             var response = new AnimeResponse
             {
                 Animes = animesPerPage,
@@ -120,24 +123,24 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
+            // Consulta
             var animes = await _animeContext.Animes.Where(x => x.DIRETOR != null && x.DIRETOR.ToLower() == diretor.ToLower()).ToListAsync();
 
-            var totalCount = animes.Count;
-            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
-
-            var animesPerPage = animes
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            // Paginação
+            int pageCount;
+            List<Anime> animesPerPage;
+            PaginacaoUtil.GetPaginacao(page, pageSize, animes, out pageCount, out animesPerPage);
 
             if (animes == null)
             {
                 return NotFound();
             }
 
+            // Logs
             _logger.LogInformation("Listagem de animes por Diretor: \n" + JsonConvert.SerializeObject(animes));
             _logger.LogInformation("Listagem de animes por Diretor da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
 
+            // Montagem resposta
             var response = new AnimeResponse
             {
                 Animes = animesPerPage,
@@ -157,24 +160,24 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
+            // Consulta
             var animes = await _animeContext.Animes.Where(x => x.RESUMO != null && x.RESUMO.ToLower().Contains(palavra_chave.ToLower())).ToListAsync();
 
-            var totalCount = animes.Count;
-            var pageCount = (int)Math.Ceiling((decimal)totalCount / pageSize);
-
-            var animesPerPage = animes
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            // Paginação
+            int pageCount;
+            List<Anime> animesPerPage;
+            PaginacaoUtil.GetPaginacao(page, pageSize, animes, out pageCount, out animesPerPage);
 
             if (animes == null)
             {
                 return NotFound();
             }
 
+            // Logs
             _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo: \n" + JsonConvert.SerializeObject(animes));
             _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
 
+            // Montagem resposta
             var response = new AnimeResponse
             {
                 Animes = animesPerPage,
