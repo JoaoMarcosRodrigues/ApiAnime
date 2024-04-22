@@ -1,6 +1,7 @@
 using ApiAnime.Context;
 using ApiAnime.Controllers;
 using ApiAnime.Models;
+using ApiAnime.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,7 +40,7 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context, null);
                 const int id = 1;
                 Anime animeEsperado = new Anime()
                 {
@@ -72,7 +73,7 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context, null);
                 const string nome = "Fairy Tail";
                 Anime animeEsperado1 = new Anime()
                 {
@@ -94,9 +95,9 @@ namespace ApiAnime.Tests
                 context.SaveChanges();
 
                 // Act
-                ActionResult<IEnumerable<Anime>> resultado = await animeController.GetAnimeByNome(nome, 1, 5);
-                IEnumerable<Anime?>? enumerableAnimes = resultado.Value;
-                
+                ActionResult<AnimeResponse> resultado = await animeController.GetAnimeByNome(nome,1,5);
+                List<Anime>? enumerableAnimes = resultado.Value?.Animes;
+
                 // Assert
                 Assert.NotNull(enumerableAnimes);
                 Assert.Single(enumerableAnimes);
@@ -111,7 +112,7 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context, null);
                 const string diretor = "Natsu";
                 Anime animeEsperado1 = new Anime()
                 {
@@ -133,9 +134,9 @@ namespace ApiAnime.Tests
                 context.SaveChanges();
 
                 // Act
-                ActionResult<IEnumerable<Anime>> resultado = await animeController.GetAnimeByDiretor(diretor, 1, 5);
-                IEnumerable<Anime?>? enumerableAnimes = resultado.Value;
-                
+                ActionResult<AnimeResponse> resultado = await animeController.GetAnimeByDiretor(diretor, 1, 5);
+                List<Anime>? enumerableAnimes = resultado.Value?.Animes;
+
                 // Assert
                 Assert.NotNull(enumerableAnimes);
                 Assert.Single(enumerableAnimes);
@@ -150,7 +151,7 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context, null);
                 const string palavra_chave = "teste";
                 Anime animeEsperado1 = new Anime()
                 {
@@ -172,8 +173,8 @@ namespace ApiAnime.Tests
                 context.SaveChanges();
 
                 // Act
-                ActionResult<IEnumerable<Anime>> resultado = await animeController.GetAnimeByPalavraChaveResumo(palavra_chave, 1, 5);
-                IEnumerable<Anime?>? enumerableAnimes = resultado.Value;
+                ActionResult<AnimeResponse> resultado = await animeController.GetAnimeByPalavraChaveResumo(palavra_chave, 1, 5);
+                List<Anime>? enumerableAnimes = resultado.Value?.Animes;
 
                 // Assert
                 Assert.NotNull(enumerableAnimes);
@@ -189,7 +190,7 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context,null);
 
                 // Act
                 var resultado = await animeController.CadastroAnime(new Anime { ID = 1, NOME = "Death Note", DIRETOR = "L", RESUMO = "teste" });
@@ -212,7 +213,7 @@ namespace ApiAnime.Tests
                 context.Animes.Add(new Anime { ID = 1, NOME = "Death Note", DIRETOR = "L", RESUMO = "teste" });
                 context.SaveChanges();
 
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context, null);
 
                 // Act
                 var novoAnime = new Anime { ID = 1, NOME = "Death Note editado", DIRETOR = "L", RESUMO = "teste" };
@@ -240,7 +241,7 @@ namespace ApiAnime.Tests
                 context.Animes.Add(new Anime { ID = 1, NOME = "Death Note", DIRETOR = "L", RESUMO = "teste" });
                 context.SaveChanges();
 
-                var animeController = new AnimeController(context);
+                var animeController = new AnimeController(context, null);
 
                 // Act
                 var resultado = await animeController.DeletarAnime(1);

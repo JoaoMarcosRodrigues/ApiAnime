@@ -15,10 +15,12 @@ namespace ApiAnime.Controllers
     public class AnimeController : ControllerBase
     {
         private readonly AnimeContext _animeContext;
-        
-        public AnimeController(AnimeContext animeContext)
+        private readonly ILogger<AnimeController>? _logger;
+
+        public AnimeController(AnimeContext animeContext, ILogger<AnimeController>? logger)
         {
-            this._animeContext = animeContext;
+            _animeContext = animeContext;
+            _logger = logger;
         }
 
         [Authorize]
@@ -39,11 +41,11 @@ namespace ApiAnime.Controllers
             PaginacaoUtil.GetPaginacao(page, pageSize, animes, out pageCount, out animesPerPage);
 
             // Logs
-            //if (_logger != null)
-            //{
-            //    _logger.LogInformation("Listagem de todos os animes: \n" + JsonConvert.SerializeObject(animes));
-            //    _logger.LogInformation("Listagem de todos os animes da página " + page + "\n" + JsonConvert.SerializeObject(animesPerPage));
-            //}
+            if (_logger != null)
+            {
+                _logger.LogInformation("Listagem de todos os animes: \n" + JsonConvert.SerializeObject(animes));
+                _logger.LogInformation("Listagem de todos os animes da página " + page + "\n" + JsonConvert.SerializeObject(animesPerPage));
+            }
 
             // Montagem resposta
             var response = new AnimeResponse
@@ -74,15 +76,15 @@ namespace ApiAnime.Controllers
             }
 
             // Log
-            //if(_logger != null)
-            //    _logger.LogInformation("Listagem de animes por Id: \n" + JsonConvert.SerializeObject(anime));
+            if (_logger != null)
+                _logger.LogInformation("Listagem de animes por Id: \n" + JsonConvert.SerializeObject(anime));
 
             return anime;
         }
 
         [Authorize]
         [HttpGet("porNome/{nome}")]
-        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByNome(string nome, int page, int pageSize)
+        public async Task<ActionResult<AnimeResponse>> GetAnimeByNome(string nome, int page, int pageSize)
         {
             if (_animeContext.Animes == null)
             {
@@ -103,10 +105,11 @@ namespace ApiAnime.Controllers
             }
 
             // Logs
-            //if (_logger != null) { 
-            //    _logger.LogInformation("Listagem de animes por Nome: \n" + JsonConvert.SerializeObject(animes));
-            //    _logger.LogInformation("Listagem de animes por Nome da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
-            //}
+            if (_logger != null)
+            {
+                _logger.LogInformation("listagem de animes por nome: \n" + JsonConvert.SerializeObject(animes));
+                _logger.LogInformation("listagem de animes por nome da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
+            }
 
             // Montagem resposta
             var response = new AnimeResponse
@@ -116,12 +119,12 @@ namespace ApiAnime.Controllers
                 CurrentPage = page
             };
 
-            return response.Animes;
+            return response;
         }
 
         [Authorize]
         [HttpGet("porDiretor/{diretor}")]
-        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByDiretor(string diretor, int page, int pageSize)
+        public async Task<ActionResult<AnimeResponse>> GetAnimeByDiretor(string diretor, int page, int pageSize)
         {
             if (_animeContext.Animes == null)
             {
@@ -142,11 +145,11 @@ namespace ApiAnime.Controllers
             }
 
             // Logs
-            //if (_logger != null)
-            //{
-            //    _logger.LogInformation("Listagem de animes por Diretor: \n" + JsonConvert.SerializeObject(animes));
-            //    _logger.LogInformation("Listagem de animes por Diretor da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
-            //}
+            if (_logger != null)
+            {
+                _logger.LogInformation("Listagem de animes por Diretor: \n" + JsonConvert.SerializeObject(animes));
+                _logger.LogInformation("Listagem de animes por Diretor da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
+            }
 
             // Montagem resposta
             var response = new AnimeResponse
@@ -156,12 +159,12 @@ namespace ApiAnime.Controllers
                 CurrentPage = page
             };
 
-            return response.Animes;
+            return response;
         }
 
         [Authorize]
         [HttpGet("porPalavraChave/{palavra_chave}")]
-        public async Task<ActionResult<IEnumerable<Anime>>> GetAnimeByPalavraChaveResumo(string palavra_chave, int page, int pageSize)
+        public async Task<ActionResult<AnimeResponse>> GetAnimeByPalavraChaveResumo(string palavra_chave, int page, int pageSize)
         {
             if (_animeContext.Animes == null)
             {
@@ -182,11 +185,11 @@ namespace ApiAnime.Controllers
             }
 
             // Logs
-            //if (_logger != null)
-            //{
-            //    _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo: \n" + JsonConvert.SerializeObject(animes));
-            //    _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
-            //}
+            if (_logger != null)
+            {
+                _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo: \n" + JsonConvert.SerializeObject(animes));
+                _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
+            }
 
             // Montagem resposta
             var response = new AnimeResponse
@@ -196,7 +199,7 @@ namespace ApiAnime.Controllers
                 CurrentPage = page
             };
 
-            return response.Animes;
+            return response;
         }
 
         [Authorize]
@@ -209,8 +212,8 @@ namespace ApiAnime.Controllers
 
             CreatedAtActionResult resultado = CreatedAtAction(nameof(GetAnimeById), new { id = anime.ID }, anime);
 
-            //if(_logger != null)
-            //    _logger.LogInformation("Anime cadastrado com sucesso!");
+            if (_logger != null)
+                _logger.LogInformation("Anime cadastrado com sucesso!");
 
             return resultado;
         }
@@ -224,7 +227,8 @@ namespace ApiAnime.Controllers
                 return BadRequest();
             }
 
-            //_animeContext.Entry(anime).State = EntityState.Modified;
+            if(_logger != null)
+                _animeContext.Entry(anime).State = EntityState.Modified;
 
             try
             {
@@ -235,8 +239,8 @@ namespace ApiAnime.Controllers
                 return NotFound();
             }
 
-            //if(_logger != null)
-            //    _logger.LogInformation("Anime editado com sucesso!");
+            if (_logger != null)
+                _logger.LogInformation("Anime editado com sucesso!");
 
             return Ok(anime);
         }
@@ -261,8 +265,8 @@ namespace ApiAnime.Controllers
 
             await _animeContext.SaveChangesAsync();
 
-            //if(_logger != null)
-            //    _logger.LogInformation("Anime excluído com sucesso!");
+            if (_logger != null)
+                _logger.LogInformation("Anime excluído com sucesso!");
 
             return Ok();
         }
