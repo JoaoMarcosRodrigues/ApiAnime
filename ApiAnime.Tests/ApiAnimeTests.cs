@@ -1,25 +1,21 @@
 using ApiAnime.Context;
 using ApiAnime.Controllers;
 using ApiAnime.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Xunit;
-using static Azure.Core.HttpHeader;
 
 namespace ApiAnime.Tests
 {
     public class ApiAnimeTests
     {
         private readonly DbContextOptions<AnimeContext> _options;
-        private readonly ILogger<AnimeController> _logger;
 
-        public ApiAnimeTests(ILogger<AnimeController> logger)
+        public ApiAnimeTests()
         {
             // Configuração do DbContextOptions para um banco de dados em memória
             _options = new DbContextOptionsBuilder<AnimeContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         // Método para criar um DbContext temporário para cada teste
@@ -43,7 +39,7 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context,_logger);
+                var animeController = new AnimeController(context);
                 const int id = 1;
                 Anime animeEsperado = new Anime()
                 {
@@ -57,7 +53,8 @@ namespace ApiAnime.Tests
                 context.SaveChanges();
 
                 // Act
-                Anime? anime = await context.Animes.FindAsync(id);
+                ActionResult<Anime> resultado = await animeController.GetAnimeById(id);
+                Anime? anime = (Anime?)resultado.Value;
 
                 // Assert
                 Assert.NotNull(anime);
@@ -75,28 +72,34 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context, _logger);
+                var animeController = new AnimeController(context);
                 const string nome = "Fairy Tail";
-                Anime animeEsperado = new Anime()
+                Anime animeEsperado1 = new Anime()
                 {
                     ID = 1,
                     NOME = nome,
                     DIRETOR = "Natsu",
                     RESUMO = "blábláblá"
                 };
+                Anime animeEsperado2 = new Anime()
+                {
+                    ID = 2,
+                    NOME = nome + " 2",
+                    DIRETOR = "Gray",
+                    RESUMO = "blebleble"
+                };
 
-                context.Animes.Add(animeEsperado);
+                context.Animes.Add(animeEsperado1);
+                context.Animes.Add(animeEsperado2);
                 context.SaveChanges();
 
                 // Act
-                Anime anime = await context.Animes.Where(x => x.NOME != null && x.NOME.ToLower() == nome.ToLower()).FirstAsync();
-
+                ActionResult<IEnumerable<Anime>> resultado = await animeController.GetAnimeByNome(nome, 1, 5);
+                IEnumerable<Anime?>? enumerableAnimes = resultado.Value;
+                
                 // Assert
-                Assert.NotNull(anime);
-                Assert.Equal(animeEsperado.ID, anime.ID);
-                Assert.Equal(animeEsperado.NOME, anime.NOME);
-                Assert.Equal(animeEsperado.DIRETOR, anime.DIRETOR);
-                Assert.Equal(animeEsperado.RESUMO, anime.RESUMO);
+                Assert.NotNull(enumerableAnimes);
+                Assert.Single(enumerableAnimes);
             }
 
             Dispose();
@@ -108,28 +111,34 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context, _logger);
+                var animeController = new AnimeController(context);
                 const string diretor = "Natsu";
-                Anime animeEsperado = new Anime()
+                Anime animeEsperado1 = new Anime()
                 {
                     ID = 1,
                     NOME = "Fairy Tail",
                     DIRETOR = diretor,
                     RESUMO = "blábláblá"
                 };
+                Anime animeEsperado2 = new Anime()
+                {
+                    ID = 2,
+                    NOME = "Fairy Tail 2",
+                    DIRETOR = diretor + " e Gray",
+                    RESUMO = "blebleble"
+                };
 
-                context.Animes.Add(animeEsperado);
+                context.Animes.Add(animeEsperado1);
+                context.Animes.Add(animeEsperado2);
                 context.SaveChanges();
 
                 // Act
-                Anime anime = await context.Animes.Where(x => x.DIRETOR != null && x.DIRETOR.ToLower() == diretor.ToLower()).FirstAsync();
-
+                ActionResult<IEnumerable<Anime>> resultado = await animeController.GetAnimeByDiretor(diretor, 1, 5);
+                IEnumerable<Anime?>? enumerableAnimes = resultado.Value;
+                
                 // Assert
-                Assert.NotNull(anime);
-                Assert.Equal(animeEsperado.ID, anime.ID);
-                Assert.Equal(animeEsperado.NOME, anime.NOME);
-                Assert.Equal(animeEsperado.DIRETOR, anime.DIRETOR);
-                Assert.Equal(animeEsperado.RESUMO, anime.RESUMO);
+                Assert.NotNull(enumerableAnimes);
+                Assert.Single(enumerableAnimes);
             }
 
             Dispose();
@@ -141,31 +150,106 @@ namespace ApiAnime.Tests
             // Arrange
             using (var context = CreateDbContext())
             {
-                var animeController = new AnimeController(context, _logger);
-                const string palavra_chave = "blá";
-                Anime animeEsperado = new Anime()
+                var animeController = new AnimeController(context);
+                const string palavra_chave = "teste";
+                Anime animeEsperado1 = new Anime()
                 {
                     ID = 1,
                     NOME = "Fairy Tail",
                     DIRETOR = "Natsu",
-                    RESUMO = "blábláblá"
+                    RESUMO = "teste"
+                };
+                Anime animeEsperado2 = new Anime()
+                {
+                    ID = 2,
+                    NOME = "Fairy Tail",
+                    DIRETOR = "Natsu",
+                    RESUMO = "teste"
                 };
 
-                context.Animes.Add(animeEsperado);
+                context.Animes.Add(animeEsperado1);
+                context.Animes.Add(animeEsperado2);
                 context.SaveChanges();
 
                 // Act
-                Anime anime = await context.Animes.Where(x => x.RESUMO != null && x.RESUMO.ToLower().Contains(palavra_chave.ToLower())).FirstAsync();
+                ActionResult<IEnumerable<Anime>> resultado = await animeController.GetAnimeByPalavraChaveResumo(palavra_chave, 1, 5);
+                IEnumerable<Anime?>? enumerableAnimes = resultado.Value;
 
                 // Assert
-                Assert.NotNull(anime);
-                Assert.Equal(animeEsperado.ID, anime.ID);
-                Assert.Equal(animeEsperado.NOME, anime.NOME);
-                Assert.Equal(animeEsperado.DIRETOR, anime.DIRETOR);
-                Assert.Equal(animeEsperado.RESUMO, anime.RESUMO);
+                Assert.NotNull(enumerableAnimes);
+                Assert.Equal(2, enumerableAnimes.Count());
             }
 
             Dispose();
         }
-    }
+
+        [Fact]
+        public async Task CadastrarAnime_DeveRetornarTrueQuandoCadastradoComSucesso()
+        {
+            // Arrange
+            using (var context = CreateDbContext())
+            {
+                var animeController = new AnimeController(context);
+
+                // Act
+                var resultado = await animeController.CadastroAnime(new Anime { ID = 1, NOME = "Death Note", DIRETOR = "L", RESUMO = "teste" });
+
+                // Assert
+                var createdResult = Assert.IsType<CreatedAtActionResult>(resultado.Result);
+                Assert.Equal(201, createdResult.StatusCode);
+            }
+
+            Dispose();
+        }
+
+        [Fact]
+        public async Task EditarAnime_DeveRetornarTrueQuandoEditadoComSucesso()
+        {
+            // Arrange
+            using (var context = CreateDbContext())
+            {
+                // Adicionar um anime inicial ao banco de dados para editar posteriormente
+                context.Animes.Add(new Anime { ID = 1, NOME = "Death Note", DIRETOR = "L", RESUMO = "teste" });
+                context.SaveChanges();
+
+                var animeController = new AnimeController(context);
+
+                // Act
+                var novoAnime = new Anime { ID = 1, NOME = "Death Note editado", DIRETOR = "L", RESUMO = "teste" };
+                var resultado = await animeController.EditarAnime(1, novoAnime);
+
+                // Assert
+                var okResult = Assert.IsType<OkObjectResult>(resultado);
+                var animeEditado = Assert.IsType<Anime>(okResult.Value);
+                Assert.Equal(novoAnime.ID, animeEditado.ID);
+                Assert.Equal(novoAnime.NOME, animeEditado.NOME);
+                Assert.Equal(novoAnime.DIRETOR, animeEditado.DIRETOR);
+                Assert.Equal(novoAnime.RESUMO, animeEditado.RESUMO);
+            }
+
+            Dispose();
+        }
+
+        [Fact]
+        public async Task ExcluirAnime_DeveRetornarNoContentQuandoExcluidoComSucesso()
+        {
+            // Arrange
+            using (var context = CreateDbContext())
+            {
+                // Adicionar um anime inicial ao banco de dados para excluir posteriormente
+                context.Animes.Add(new Anime { ID = 1, NOME = "Death Note", DIRETOR = "L", RESUMO = "teste" });
+                context.SaveChanges();
+
+                var animeController = new AnimeController(context);
+
+                // Act
+                var resultado = await animeController.DeletarAnime(1);
+
+                // Assert
+                Assert.IsType<OkResult>(resultado);
+            }
+
+            Dispose();
+        }
+    }   
 }
