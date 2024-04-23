@@ -34,7 +34,7 @@ namespace ApiAnime.Tests
             }
         }
 
-        [Fact(DisplayName = "Insira um ID válido para obter o anime específico.")]
+        [Fact(DisplayName = "Insira um ID válido para obter o Anime específico.")]
         public async void GivenValidID_WhenGetAnimeById_ThenShouldSuccess()
         {
             // Arrange
@@ -67,7 +67,7 @@ namespace ApiAnime.Tests
             Dispose();
         }
 
-        [Fact(DisplayName = "Insira um Nome válido para obter o anime específico.")]
+        [Fact(DisplayName = "Insira um Nome válido para obter Animes específicos.")]
         public async void GivenValidNome_WhenGetAnimeByNome_ThenShouldSuccess()
         {
             // Arrange
@@ -106,7 +106,7 @@ namespace ApiAnime.Tests
             Dispose();
         }
 
-        [Fact(DisplayName = "Insira um Diretor válido para obter o anime específico.")]
+        [Fact(DisplayName = "Insira um Diretor válido para obter Animes específicos.")]
         public async void GivenValidDiretor_WhenGetAnimeByDiretor_ThenShouldSuccess()
         {
             // Arrange
@@ -145,7 +145,7 @@ namespace ApiAnime.Tests
             Dispose();
         }
 
-        [Fact(DisplayName = "Insira uma Palavra-Chave válida para obter o anime específico.")]
+        [Fact(DisplayName = "Insira uma Palavra-Chave válida para obter Animes específicos.")]
         public async void GivenValidPalavraChave_WhenGetAnimeByPalavraChaveResumo_ThenShouldSuccess()
         {
             // Arrange
@@ -184,7 +184,7 @@ namespace ApiAnime.Tests
             Dispose();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Insira um Anime para realizar seu cadastro.")]
         public async Task CadastrarAnime_DeveRetornarTrueQuandoCadastradoComSucesso()
         {
             // Arrange
@@ -203,7 +203,7 @@ namespace ApiAnime.Tests
             Dispose();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Insira um ID válido e um Anime para editar os dados de um Anime específico.")]
         public async Task EditarAnime_DeveRetornarTrueQuandoEditadoComSucesso()
         {
             // Arrange
@@ -231,7 +231,7 @@ namespace ApiAnime.Tests
             Dispose();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Insira um ID válido para excluir um Anime específico.")]
         public async Task ExcluirAnime_DeveRetornarNoContentQuandoExcluidoComSucesso()
         {
             // Arrange

@@ -23,6 +23,7 @@ namespace ApiAnime.Controllers
             _logger = logger;
         }
 
+        // Obter todos os Animes cadastrados
         [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Anime>>> GetAnimes(int page, int pageSize)
@@ -43,8 +44,8 @@ namespace ApiAnime.Controllers
             // Logs
             if (_logger != null)
             {
-                _logger.LogInformation("Listagem de todos os animes: \n" + JsonConvert.SerializeObject(animes));
-                _logger.LogInformation("Listagem de todos os animes da página " + page + "\n" + JsonConvert.SerializeObject(animesPerPage));
+                _logger.LogInformation("\nListagem de todos os animes: \n" + JsonConvert.SerializeObject(animes) + "\n");
+                _logger.LogInformation("\nListagem de todos os animes da página " + page + "\n" + JsonConvert.SerializeObject(animesPerPage) + "\n");
             }
 
             // Montagem resposta
@@ -58,6 +59,7 @@ namespace ApiAnime.Controllers
             return Ok(response);
         }
 
+        // Obter Anime por ID
         [Authorize]
         [HttpGet("porId/{id}")]
         public async Task<ActionResult<Anime>> GetAnimeById(int id)
@@ -77,11 +79,12 @@ namespace ApiAnime.Controllers
 
             // Log
             if (_logger != null)
-                _logger.LogInformation("Listagem de animes por Id: \n" + JsonConvert.SerializeObject(anime));
+                _logger.LogInformation("\nListagem de animes por Id: \n" + JsonConvert.SerializeObject(anime) + "\n");
 
             return anime;
         }
 
+        // Obter Anime por Nome
         [Authorize]
         [HttpGet("porNome/{nome}")]
         public async Task<ActionResult<AnimeResponse>> GetAnimeByNome(string nome, int page, int pageSize)
@@ -107,8 +110,8 @@ namespace ApiAnime.Controllers
             // Logs
             if (_logger != null)
             {
-                _logger.LogInformation("listagem de animes por nome: \n" + JsonConvert.SerializeObject(animes));
-                _logger.LogInformation("listagem de animes por nome da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
+                _logger.LogInformation("\nListagem de animes por nome: \n" + JsonConvert.SerializeObject(animes) + "\n");
+                _logger.LogInformation("\nListagem de animes por nome da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage) + "\n");
             }
 
             // Montagem resposta
@@ -122,6 +125,7 @@ namespace ApiAnime.Controllers
             return response;
         }
 
+        // Obter Anime por Diretor
         [Authorize]
         [HttpGet("porDiretor/{diretor}")]
         public async Task<ActionResult<AnimeResponse>> GetAnimeByDiretor(string diretor, int page, int pageSize)
@@ -147,8 +151,8 @@ namespace ApiAnime.Controllers
             // Logs
             if (_logger != null)
             {
-                _logger.LogInformation("Listagem de animes por Diretor: \n" + JsonConvert.SerializeObject(animes));
-                _logger.LogInformation("Listagem de animes por Diretor da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
+                _logger.LogInformation("\nListagem de animes por Diretor: \n" + JsonConvert.SerializeObject(animes) + "\n");
+                _logger.LogInformation("\nListagem de animes por Diretor da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage) + "\n");
             }
 
             // Montagem resposta
@@ -162,6 +166,7 @@ namespace ApiAnime.Controllers
             return response;
         }
 
+        // Obter Anime que tenha Palavra Chave no Resumo
         [Authorize]
         [HttpGet("porPalavraChave/{palavra_chave}")]
         public async Task<ActionResult<AnimeResponse>> GetAnimeByPalavraChaveResumo(string palavra_chave, int page, int pageSize)
@@ -187,8 +192,8 @@ namespace ApiAnime.Controllers
             // Logs
             if (_logger != null)
             {
-                _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo: \n" + JsonConvert.SerializeObject(animes));
-                _logger.LogInformation("Listagem de animes por Palavras Chaves no Resumo da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage));
+                _logger.LogInformation("\nListagem de animes por Palavras Chaves no Resumo: \n" + JsonConvert.SerializeObject(animes)+"\n");
+                _logger.LogInformation("\nListagem de animes por Palavras Chaves no Resumo da página " + page + ":\n" + JsonConvert.SerializeObject(animesPerPage) + "\n");
             }
 
             // Montagem resposta
@@ -202,6 +207,7 @@ namespace ApiAnime.Controllers
             return response;
         }
 
+        // Cadastrar Anime
         [Authorize]
         [HttpPost]
         public async Task<ActionResult<Anime>> CadastroAnime(Anime anime)
@@ -213,11 +219,12 @@ namespace ApiAnime.Controllers
             CreatedAtActionResult resultado = CreatedAtAction(nameof(GetAnimeById), new { id = anime.ID }, anime);
 
             if (_logger != null)
-                _logger.LogInformation("Anime cadastrado com sucesso!");
+                _logger.LogInformation("\nAnime cadastrado com sucesso!\n");
 
             return resultado;
         }
 
+        // Editar Anime
         [Authorize]
         [HttpPut]
         public async Task<IActionResult> EditarAnime(int id, Anime anime)
@@ -240,11 +247,12 @@ namespace ApiAnime.Controllers
             }
 
             if (_logger != null)
-                _logger.LogInformation("Anime editado com sucesso!");
+                _logger.LogInformation("\nAnime editado com sucesso!\n");
 
             return Ok(anime);
         }
 
+        // Excluir Anime
         [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletarAnime(int id)
@@ -266,7 +274,7 @@ namespace ApiAnime.Controllers
             await _animeContext.SaveChangesAsync();
 
             if (_logger != null)
-                _logger.LogInformation("Anime excluído com sucesso!");
+                _logger.LogInformation("\nAnime excluído com sucesso!\n");
 
             return Ok();
         }
